@@ -21,8 +21,8 @@ import java.nio.file.Path;
 @RestController
 @RequestMapping("/api/socks/files/operations")
 @Tag(
-        name = "Файлы с операциями",
-        description = "Импорт и экспорт файлов с операциями над носками"
+        name = "Файлы операций",
+        description = "Импорт и экспорт файлов операций с носками"
 )
 @ApiResponses(value = {
         @ApiResponse(
@@ -46,7 +46,7 @@ public class FileOperationsController {
 
     @GetMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
-            summary = "Скачать все операции над носками в виде json-файла"
+            summary = "Скачать все операции с носками в виде json-файла"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -73,7 +73,7 @@ public class FileOperationsController {
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
-            summary = "Загрузить json-файл с операциями над носками"
+            summary = "Загрузить json-файл операций с носками"
     )
     @ApiResponses(value = {
             @ApiResponse(

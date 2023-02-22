@@ -22,7 +22,7 @@ import java.nio.file.Path;
 @RequestMapping("/api/socks/files")
 @Tag(
         name = "Файлы",
-        description = "Импорт и экспорт файлов с носками"
+        description = "Импорт и экспорт файлов со списком носков"
 )
 @ApiResponses(value = {
         @ApiResponse(
@@ -46,7 +46,7 @@ public class FileController {
 
     @GetMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
-            summary = "Скачать все носки в виде json-файла"
+            summary = "Скачать список всех носков в виде json-файла"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -73,7 +73,7 @@ public class FileController {
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
-            summary = "Загрузить json-файл с носками"
+            summary = "Загрузить json-файл со списком носков"
     )
     @ApiResponses(value = {
             @ApiResponse(
