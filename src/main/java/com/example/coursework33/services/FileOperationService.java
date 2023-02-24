@@ -3,29 +3,29 @@ package com.example.coursework33.services;
 import java.io.File;
 
 /**
- * Сервис для работы с файлами
+ * Сервис для работы с файлами операций
  */
-public interface FileService {
+public interface FileOperationService {
 
     /**
-     * Сохранить в файл
+     * Сохранить в файл операций
      * @param json - название файла
      */
     void saveToFile(String json);
 
     /**
-     * Очистить файл
+     * Очистить файл операций
      */
     void cleanFile();
 
     /**
-     * Получить файл
+     * Получить файл операций
      * @return - файл
      */
     File getFile();
 
     /**
-     * Очистить и получить файл
+     * Очистить и получить файл операций
      * @return - файл
      */
     File cleanAndGetFile();

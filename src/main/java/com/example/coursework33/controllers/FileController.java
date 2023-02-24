@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.nio.file.Path;
 
 @RestController
 @RequestMapping("/api/socks/files")
@@ -31,12 +29,6 @@ import java.nio.file.Path;
         )
 })
 public class FileController {
-
-    @Value("${path.to.socks.file}")
-    private String socksFilePath;
-
-    @Value("${name.of.socks.file}")
-    private String socksFileName;
 
     private final FileService fileService;
 
@@ -59,7 +51,7 @@ public class FileController {
             )
     })
     public ResponseEntity<InputStreamResource> downloadFile() throws FileNotFoundException {
-        File file = fileService.getFile(socksFilePath, socksFileName);
+        File file = fileService.getFile();
         if (file.exists()) {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
             return ResponseEntity.ok()
@@ -82,8 +74,7 @@ public class FileController {
             )
     })
     public ResponseEntity<Void> uploadFile(@RequestParam MultipartFile multipartFile) {
-        fileService.cleanFile(Path.of(socksFilePath, socksFileName));
-        File file = fileService.getFile(socksFilePath, socksFileName);
+        File file = fileService.cleanAndGetFile();
         try (FileOutputStream fos = new FileOutputStream(file)) {
             IOUtils.copy(multipartFile.getInputStream(), fos);
             return ResponseEntity.ok().build();

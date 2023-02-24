@@ -1,12 +1,11 @@
 package com.example.coursework33.controllers;
 
-import com.example.coursework33.services.FileService;
+import com.example.coursework33.services.FileOperationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.nio.file.Path;
 
 @RestController
 @RequestMapping("/api/socks/files/operations")
@@ -32,16 +30,10 @@ import java.nio.file.Path;
 })
 public class FileOperationsController {
 
-    @Value("${path.to.socks.operations.file}")
-    private String socksOperationsFilePath;
+    private final FileOperationService fileOperationService;
 
-    @Value("${name.of.socks.operations.file}")
-    private String socksOperationsFileName;
-
-    private final FileService fileService;
-
-    public FileOperationsController(FileService fileService) {
-        this.fileService = fileService;
+    public FileOperationsController(FileOperationService fileOperationService) {
+        this.fileOperationService = fileOperationService;
     }
 
     @GetMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -59,7 +51,7 @@ public class FileOperationsController {
             )
     })
     public ResponseEntity<InputStreamResource> downloadFile() throws FileNotFoundException {
-        File file = fileService.getFile(socksOperationsFilePath, socksOperationsFileName);
+        File file = fileOperationService.getFile();
         if (file.exists()) {
             InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
             return ResponseEntity.ok()
@@ -82,8 +74,7 @@ public class FileOperationsController {
             )
     })
     public ResponseEntity<Void> uploadFile(@RequestParam MultipartFile multipartFile) {
-        fileService.cleanFile(Path.of(socksOperationsFilePath, socksOperationsFileName));
-        File file = fileService.getFile(socksOperationsFilePath, socksOperationsFileName);
+        File file = fileOperationService.cleanAndGetFile();
         try (FileOutputStream fos = new FileOutputStream(file)) {
             IOUtils.copy(multipartFile.getInputStream(), fos);
             return ResponseEntity.ok().build();

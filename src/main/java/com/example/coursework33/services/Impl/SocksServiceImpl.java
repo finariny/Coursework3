@@ -10,21 +10,13 @@ import com.example.coursework33.services.SocksService;
 import com.example.coursework33.services.ValidationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class SocksServiceImpl implements SocksService {
-
-    @Value("${path.to.socks.file}")
-    private String socksFilePath;
-
-    @Value("${name.of.socks.file}")
-    private String socksFileName;
 
     private final Map<Socks, Integer> socksMap = new HashMap<>();
     private final ValidationService validationService;
@@ -32,12 +24,15 @@ public class SocksServiceImpl implements SocksService {
 
     private final SocksOperationService socksOperationService;
 
+    private final ObjectMapper objectMapper;
+
     public SocksServiceImpl(ValidationService validationService,
                             FileService fileService,
-                            SocksOperationService socksOperationService) {
+                            SocksOperationService socksOperationService, ObjectMapper objectMapper) {
         this.validationService = validationService;
         this.fileService = fileService;
         this.socksOperationService = socksOperationService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -59,40 +54,20 @@ public class SocksServiceImpl implements SocksService {
 
     @Override
     public Socks issuance(SocksBatch socksBatch) {
-        if (validationService.validateSocks(socksBatch)) {
-            Socks socks = socksBatch.getSocks();
-            if (socksMap.containsKey(socks)) {
-                int currentQuantity = socksMap.get(socks);
-                if (currentQuantity > socksBatch.getQuantity()) {
-                    socksMap.replace(socks, currentQuantity - socksBatch.getQuantity());
-                } else {
-                    socksMap.remove(socks);
-                }
-                saveToFile();
-                socksOperationService.issuance(socksBatch);
-                return socks;
-            }
+        Socks socks = issuanceAndReject(socksBatch);
+        if (socks != null) {
+            socksOperationService.issuance(socksBatch);
         }
-        return null;
+        return socks;
     }
 
     @Override
     public Socks reject(SocksBatch socksBatch) {
-        if (validationService.validateSocks(socksBatch)) {
-            Socks socks = socksBatch.getSocks();
-            if (socksMap.containsKey(socks)) {
-                int currentQuantity = socksMap.get(socks);
-                if (currentQuantity > socksBatch.getQuantity()) {
-                    socksMap.replace(socks, currentQuantity - socksBatch.getQuantity());
-                } else {
-                    socksMap.remove(socks);
-                }
-                saveToFile();
-                socksOperationService.reject(socksBatch);
-                return socks;
-            }
+        Socks socks = issuanceAndReject(socksBatch);
+        if (socks != null) {
+            socksOperationService.reject(socksBatch);
         }
-        return null;
+        return socks;
     }
 
     @Override
@@ -114,10 +89,27 @@ public class SocksServiceImpl implements SocksService {
 
     private void saveToFile() {
         try {
-            String json = new ObjectMapper().writeValueAsString(socksMap);
-            fileService.saveToFile(json, Path.of(socksFilePath, socksFileName));
+            String json = objectMapper.writeValueAsString(socksMap);
+            fileService.saveToFile(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+    }
+
+    private Socks issuanceAndReject(SocksBatch socksBatch) {
+        if (validationService.validateSocks(socksBatch)) {
+            Socks socks = socksBatch.getSocks();
+            if (socksMap.containsKey(socks)) {
+                int currentQuantity = socksMap.get(socks);
+                if (currentQuantity > socksBatch.getQuantity()) {
+                    socksMap.replace(socks, currentQuantity - socksBatch.getQuantity());
+                } else {
+                    socksMap.remove(socks);
+                }
+                saveToFile();
+                return socks;
+            }
+        }
+        return null;
     }
 }

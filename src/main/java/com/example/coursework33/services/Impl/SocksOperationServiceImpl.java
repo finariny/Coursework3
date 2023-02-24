@@ -3,31 +3,27 @@ package com.example.coursework33.services.Impl;
 import com.example.coursework33.models.operations.OperationType;
 import com.example.coursework33.models.operations.SocksOperation;
 import com.example.coursework33.models.socks.SocksBatch;
-import com.example.coursework33.services.FileService;
+import com.example.coursework33.services.FileOperationService;
 import com.example.coursework33.services.SocksOperationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class SocksOperationServiceImpl implements SocksOperationService {
 
-    @Value("${path.to.socks.operations.file}")
-    private String socksOperationsFilePath;
-
-    @Value("${name.of.socks.operations.file}")
-    private String socksOperationsFileName;
-
     private final List<SocksOperation> socksOperationList = new ArrayList<>();
-    private final FileService fileService;
 
-    public SocksOperationServiceImpl(FileService fileService) {
-        this.fileService = fileService;
+    private final FileOperationService fileOperationService;
+
+    private final ObjectMapper objectMapper;
+
+    public SocksOperationServiceImpl(FileOperationService fileOperationService, ObjectMapper objectMapper) {
+        this.fileOperationService = fileOperationService;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -50,8 +46,8 @@ public class SocksOperationServiceImpl implements SocksOperationService {
 
     private void saveToFile() {
         try {
-            String json = new ObjectMapper().writeValueAsString(socksOperationList);
-            fileService.saveToFile(json, Path.of(socksOperationsFilePath, socksOperationsFileName));
+            String json = objectMapper.writeValueAsString(socksOperationList);
+            fileOperationService.saveToFile(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

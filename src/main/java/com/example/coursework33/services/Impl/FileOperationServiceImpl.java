@@ -1,6 +1,6 @@
 package com.example.coursework33.services.Impl;
 
-import com.example.coursework33.services.FileService;
+import com.example.coursework33.services.FileOperationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -10,18 +10,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Service
-public class FileServiceImpl implements FileService {
+public class FileOperationServiceImpl implements FileOperationService {
 
-    @Value("${path.to.socks.file}")
-    private String socksFilePath;
+    @Value("${path.to.socks.operations.file}")
+    private String socksOperationsFilePath;
 
-    @Value("${name.of.socks.file}")
-    private String socksFileName;
+    @Value("${name.of.socks.operations.file}")
+    private String socksOperationsFileName;
 
     @Override
     public void saveToFile(String json) {
         try {
-            Path path = Path.of(socksFilePath, socksFileName);
+            Path path = Path.of(socksOperationsFilePath, socksOperationsFileName);
             cleanFile();
             Files.writeString(path, json);
         } catch (IOException e) {
@@ -32,7 +32,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public void cleanFile() {
         try {
-            Path path = Path.of(socksFilePath, socksFileName);
+            Path path = Path.of(socksOperationsFilePath, socksOperationsFileName);
             Files.deleteIfExists(path);
             Files.createFile(path);
         } catch (IOException e) {
@@ -42,7 +42,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public File getFile() {
-        return new File(socksFilePath + "/" + socksFileName);
+        return new File(socksOperationsFilePath + "/" + socksOperationsFileName);
     }
 
     @Override
